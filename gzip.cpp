@@ -36,18 +36,17 @@ int main(int argc, char** argv)
 	struct tree* huffCode = (tree*) malloc(SYMB * sizeof(tree));
 	HuffmanTree* huffTree = createHFTree();
 
-	//FILE *fp = fopen("decode.txt", "a+");
 
 	//--- obter ficheiro a descompactar
-	char fileName[] = "FAQ.txt.gz";
+	//char fileName[] = "FAQ.txt.gz";
 
 	//--- Recebendo o caminho do ficheiro por argumento ------
-	/*if (argc != 2)
+	if (argc != 2)
 	{
 		printf("Linha de comando inválida!!!");
 		return -1;
 	}
-	char * fileName = argv[1];*/
+	char * fileName = argv[1];
 
 	//--- processar ficheiro
 	gzFile = fopen(fileName, "r");
@@ -77,14 +76,15 @@ int main(int argc, char** argv)
 		//--- ler o block header: primeiro byte depois do cabeçalho do ficheiro
 		needBits = 3;
 		getByte(&rb, &availBits, needBits, gzFile); 	//Get de mais informação caso o necessário não esteja ainda no rb
-
+		//------ Original ------
 		/*if (availBits < needBits)
 		{
 			fread(&byte, 1, 1, gzFile);
 			rb = (byte << availBits) | rb;
 			availBits += 8;
-		}*/
-		
+		}*/ 		
+		//----- Original -------
+
 		//obter BFINAL
 		//ver se é o último bloco
 		BFINAL = rb & 0x01; //primeiro bit é o menos significativo
@@ -101,50 +101,48 @@ int main(int argc, char** argv)
 		//--- Se chegou aqui --> compactado com Huffman dinâmico --> descompactar
 		//**************************************************
 		//****** ADICIONAR PROGRAMA... *********************
-		//------ Exercicio 1 ------		
+		//------------------------------------------------------------------------------------------------------------------------------------- Exercicio 1 ------		
 		getBlockFormat(&rb, &availBits, gzFile, &hlit, &hdist, &hclen);
-		//------ Exercicio 2 ------
+		//------------------------------------------------------------------------------------------------------------------------------------- Exercicio 2 ------
 		int codeLen[SYMB] = {0};
 		int maxBits = getCodeLength(&rb, &availBits, hclen, codeLen, gzFile);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("%d\n", maxBits);	//Efeitos de teste
 		//printArray(codeLen, SYMB);
-		
-		//------ Exercicio 3 ------
+		//------------------------------------------------------------------------------------------------------------------------------------- Exercicio 3 ------
 		int symbols[SYMB] = {0, 1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,10 ,11 ,12 ,13 ,14 ,15 ,16 ,17 ,18};	//Simbolos do alfabeto
 		getOrderedSymbols(symbols, codeLen, SYMB);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nSYMBOLS: \n");
 		//printArray(symbols, SYMB); //Efeitos de teste
 		//printf("\nCODELEN: \n");
 		//printArray(codeLen,SYMB);	//Efeitos de teste
-
 		int bl_count[SYMB] = {0};
 		getBlCount(codeLen, bl_count, SYMB);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nBL_COUNT: \n");
 		//printArray(bl_count,SYMB);	//Efeitos de teste
-
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		int next_code[maxBits];
-		getNumericalValue(bl_count, next_code, maxBits);	
+		getNumericalValue(bl_count, next_code, maxBits);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nNEXT_CODE: \n");	
 		//printArray(next_code, maxBits + 1); //maxBits + 1 para que o print possa imprimir até ao indice 5 	//Efeitos de teste
-
 		createHuffCode(huffCode, symbols, codeLen, next_code, SYMB);
-
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		/*for(int i = 0; i < SYMB; i++)	//Efeitos de teste
 		{
 			printf("[%d] - LEN: %d, CODE: %s\n", i, huffCode[i].Len, huffCode[i].Code);	
-		}*/
-		
+		}*/		
 		createHuffTree(huffCode, huffTree, symbols, SYMB);
-
-
-
-		//------ Exercicio 4 ------
+		//------------------------------------------------------------------------------------------------------------------------------------ Exercicio 4 ------
 		int huffLiteral[hlit + 257];
 		int maxBitsLiteral = getLiteralLength(hlit, &rb, &availBits, gzFile, huffTree, huffLiteral);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printArray(huffLiteral, hlit + 257);
-
 		int huffDistance[hdist + 1];
 		int maxBitsDistance = getDistance(hdist, &rb, &availBits, gzFile, huffTree, huffDistance);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printArray(huffDistance, hdist + 1);
 
 
@@ -242,9 +240,10 @@ int main(int argc, char** argv)
 		free(huffCodeDistance);
 		free(huffTreeDistance);
 
+		printf("INT: %ld\n", sizeof(int));
 
-
-		printf("BLOCO %d\n", numBlocks);
+		printf("BLOCO: %d\n", numBlocks);
+		printf("BFINAL: %d\n", BFINAL);
 		//**************************************************
         
         																																										
@@ -252,7 +251,9 @@ int main(int argc, char** argv)
 		numBlocks++;
 	}while(BFINAL == 0);
 
-	FILE* fp = fopen("decode.txt", "w+");
+	char fn[1024];
+	sprintf(fn, "%s", gzh.fName);
+	FILE* fp = fopen(fn, "w+");
 
 	for(int i = 0; i < sizeof(ficheiro); i++)
 	{
@@ -470,7 +471,7 @@ void bits2String(char *strBits, int len, int byte)
 void getByte(unsigned int *rb, char *availBits, char needBits, FILE *gzFile)
 {
 	unsigned char byte;
-	if ((*availBits) < needBits)
+	while ((*availBits) < needBits)
 	{
 		fread(&byte, 1, 1, gzFile);
 		*rb = (byte << (*availBits)) | *rb;
@@ -827,7 +828,7 @@ void decodeDataBytes(HuffmanTree* huffTreeLiteral, HuffmanTree* huffTreeDistance
 			index = nextNode(huffTreeLiteral, bits);
 
 
-			if((index >= 0) && (index <= 256))
+			if((index >= 0) && (index <= 255))
 			{
 				//printf("INDEX: %d\n", index);
 				//printf("FRONTFILE: %d\n", *frontFile);
@@ -901,7 +902,7 @@ int decodeDist(HuffmanTree* huffTreeDistance, unsigned int *rb, char *availBits,
 	int dist[30] = {1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577};
 	int recua;
 	char needBits;
-	unsigned char bits;
+	unsigned int bits;
 	int index;
 
 	resetCurNode(huffTreeDistance);
@@ -923,14 +924,16 @@ int decodeDist(HuffmanTree* huffTreeDistance, unsigned int *rb, char *availBits,
 		}
 		else if(index >= 4 && index <= 29)
 		{
-			needBits = ((index - 4) / 2) + 1;
+			needBits = ((index - 4) / 2) + 1; //ATENÇÃO BITS = 13
 			getByte(rb, availBits, needBits, gzFile);
-			bits = (*rb << (8 - needBits));	//coloca uma máscara nos bits que são precisos para ler
-			bits = bits >> (8 - needBits);
+			bits = (*rb << ((4 * 8) - needBits));	//coloca uma máscara nos bits que são precisos para ler
+			bits = bits >> ((4 * 8) - needBits);
 			*rb = *rb >> needBits;
 			(*availBits) -= needBits;
 
 			recua = dist[index] + bits;
+			if(index >= 18)
+						printf("index: %d needBits: %d recua: %d\n", index, needBits, recua);
 		}
 	}
 	return recua;

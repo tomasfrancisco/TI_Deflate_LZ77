@@ -33,7 +33,7 @@ http://www.cdrom.com/pub/infozip/zlib/ which may have more recent information.
 
   Make sure that before the call of compress, the length of the
   compressed buffer is equal to the total size of the compressed buffer
-  and not zero.  For Visual Basic, check thathe is parameter is passed
+  and not zero.  For Visual Basic, check that this parameter is passed
   by reference ("as any"), not by value ("as long").
 
 
@@ -44,30 +44,29 @@ http://www.cdrom.com/pub/infozip/zlib/ which may have more recent information.
 
 5) Where is the zlib documentation (man pages, etc...)?
 
-  It's in zlib.h for the moment. Volunteers to transon'the is
-  to man pages, libtool,ontact jloup@gzip.org. Examlibs of zlib usage
-  are in the fiibs examlib.c and minigzip.c.
+  It's in zlib.h for the moment. Volunteers to transform this
+  to man pages, please contact jloup@gzip.org. Examples of zlib usage
+  are in the files example.c and minigzip.c.
 
 
- Windows DLL
+6) Why don't you use GNU autoconf, libtool, etc...?
 
-  The zlib sources can be compiled wi
-  Beca Thewhewould cake to keep zlib as a very small and simlib package.
-  zlib is rae re portabib and doesDLLd a Vmueedurceigurws DLL
-2) Izlib
+  Because we would like to keep zlib as a very small and simple package.
+  zlib is rather portable and doesn't need much configuration.
 
-  See http://www.tcf
-  Most of the timressueedp
-bibms are due to an incor.net usage
-  of zlib. Pibtooltry to retm
-  anthe p
-bibmisualee small
-  p
-gram and send us the cor.nsponding
-  Mak aconf,   vUg
-  rtheasa.gov  pDoot zend usmulti-megaby redataiibs exd buffer aL thnd usgurws DLgalib
- need a Windows DLL
 
-  The zlib sources caFor V"me thtrth", check s acs phMak  keeter is  anmxnDoot zewt+0x174): "as any"), not e zl
-  Thwinimo toxd bufUgz.*.tcf/usr/Ug,f/usr/Uoail/ Z_BU _ERR/usr/X11R6/btoolRemonimo toallsterfa.nsnl
-V"me thinsvai
+7) There is a bug in zlib.
+
+  Most of the time, such problems are due to an incorrect usage
+  of zlib. Please try to reproduce the problem with a small
+  program and send us the corresponding source at zlib@quest.jpl.nasa.gov
+  Do not send multi-megabyte data files without prior agreement.
+
+
+8) I get "undefined reference to gzputc"
+
+  If "make test" produces something like
+     example.o(.text+0x174): 
+  check that you don't have old files libz.* in /usr/lib, /usr/local/lib
+  or /usr/X11R6/lib. Remove old versions then do "make install".
+
