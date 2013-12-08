@@ -56,7 +56,8 @@ int main(int argc, char** argv)
 
 	//ler tamanho do ficheiro original (acrescentar: e definir Vector com símbolos
 	origFileSize = getOrigFileSize(gzFile);
-	printf("ORIGFILESIZE: %ld\n", origFileSize);
+	//------------------------------------------------------------------------------------------------------------------- Debugging -------
+	//printf("ORIGFILESIZE: %ld\n", origFileSize);
 	char ficheiro[origFileSize];
 	int frontFile = 0;
 
@@ -88,7 +89,8 @@ int main(int argc, char** argv)
 		//obter BFINAL
 		//ver se é o último bloco
 		BFINAL = rb & 0x01; //primeiro bit é o menos significativo
-		printf("BFINAL = %d\n", BFINAL);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+		//printf("BFINAL = %d\n", BFINAL);
 		rb = rb >> 1; //descartar o bit correspondente ao BFINAL
 		availBits -=1;
 						
@@ -101,65 +103,97 @@ int main(int argc, char** argv)
 		//--- Se chegou aqui --> compactado com Huffman dinâmico --> descompactar
 		//**************************************************
 		//****** ADICIONAR PROGRAMA... *********************
-		//------------------------------------------------------------------------------------------------------------------------------------- Exercicio 1 ------		
+		//------------------------------------------------------------------------------------------------------------------------------------- Exercicio 1 ------	
+			
 		getBlockFormat(&rb, &availBits, gzFile, &hlit, &hdist, &hclen);
+
 		//------------------------------------------------------------------------------------------------------------------------------------- Exercicio 2 ------
+
 		int codeLen[SYMB] = {0};
 		int maxBits = getCodeLength(&rb, &availBits, hclen, codeLen, gzFile);
+
 		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("%d\n", maxBits);	//Efeitos de teste
 		//printArray(codeLen, SYMB);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		//------------------------------------------------------------------------------------------------------------------------------------- Exercicio 3 ------
+
 		int symbols[SYMB] = {0, 1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,10 ,11 ,12 ,13 ,14 ,15 ,16 ,17 ,18};	//Simbolos do alfabeto
 		getOrderedSymbols(symbols, codeLen, SYMB);
+
 		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nSYMBOLS: \n");
 		//printArray(symbols, SYMB); //Efeitos de teste
 		//printf("\nCODELEN: \n");
 		//printArray(codeLen,SYMB);	//Efeitos de teste
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		int bl_count[SYMB] = {0};
 		getBlCount(codeLen, bl_count, SYMB);
+
 		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nBL_COUNT: \n");
 		//printArray(bl_count,SYMB);	//Efeitos de teste
 		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		int next_code[maxBits];
 		getNumericalValue(bl_count, next_code, maxBits);
+
 		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nNEXT_CODE: \n");	
 		//printArray(next_code, maxBits + 1); //maxBits + 1 para que o print possa imprimir até ao indice 5 	//Efeitos de teste
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		createHuffCode(huffCode, symbols, codeLen, next_code, SYMB);
+
 		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		/*for(int i = 0; i < SYMB; i++)	//Efeitos de teste
 		{
 			printf("[%d] - LEN: %d, CODE: %s\n", i, huffCode[i].Len, huffCode[i].Code);	
 		}*/		
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		createHuffTree(huffCode, huffTree, symbols, SYMB);
+
 		//------------------------------------------------------------------------------------------------------------------------------------ Exercicio 4 ------
+
 		int huffLiteral[hlit + 257];
 		int maxBitsLiteral = getLiteralLength(hlit, &rb, &availBits, gzFile, huffTree, huffLiteral);
+
 		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printArray(huffLiteral, hlit + 257);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		int huffDistance[hdist + 1];
 		int maxBitsDistance = getDistance(hdist, &rb, &availBits, gzFile, huffTree, huffDistance);
+
 		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printArray(huffDistance, hdist + 1);
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 
+		//------------------------------------------------------------------------------------------------------------------------------------ Exercicio 5 ------
 
-		//------ Exercicio 5 ------
-		//Literal
+		//------------------------------------------------------------------------------------------------------------------------------------ Literal ----------
+
 		int symbolsLiteral[hlit + 257];
 		for(int i = 0; i < hlit + 257; i++)
 		{
 			symbolsLiteral[i] = i;	//Cria o array de simbolos do alfabeto
 		}
 
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printArray(huffLiteral, (hlit + 257));	//Efeitos de teste
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		getOrderedSymbols(symbolsLiteral, huffLiteral, (hlit + 257));
+
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nSYMBOLS: \n");
 		//printArray(symbolsLiteral, (hlit + 257)); //Efeitos de teste
 		//printf("\nCODELEN: \n");
 		//printArray(huffLiteral, (hlit + 257));	//Efeitos de teste
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 
 		int bl_countLiteral[hlit + 257];
 		for(int i = 0; i < hlit + 257; i++)
@@ -167,86 +201,97 @@ int main(int argc, char** argv)
 			bl_countLiteral[i] = 0;
 		}
 		getBlCount(huffLiteral, bl_countLiteral, (hlit + 257));
+
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nBL_COUNT: \n");
 		//printArray(bl_countLiteral, (hlit + 257));	//Efeitos de teste
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 
 		int next_codeLiteral[maxBitsLiteral];
-		getNumericalValue(bl_countLiteral, next_codeLiteral, maxBitsLiteral);	
+		getNumericalValue(bl_countLiteral, next_codeLiteral, maxBitsLiteral);
+
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------	
 		//printf("\nNEXT_CODE: \n");	
 		//printArray(next_codeLiteral, (maxBitsLiteral + 1)); //maxBits + 1 para que o print possa imprimir até ao indice 5 	//Efeitos de teste
 		//printf("MAXBITSLITERAL: %d\n", maxBitsLiteral);
-		
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------		
+
 		struct tree* huffCodeLiteral = (tree*) malloc((hlit + 257) * sizeof(tree));	
 		createHuffCode(huffCodeLiteral, symbolsLiteral, huffLiteral, next_codeLiteral, (hlit + 257));
 
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		/*for(int i = 0; i < hlit + 257; i++)	//Efeitos de teste
 		{
 			printf("[%d] - LEN: %d, CODE: %s\n", i, huffCodeLiteral[i].Len, huffCodeLiteral[i].Code);	
 		}*/
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		HuffmanTree* huffTreeLiteral = createHFTree();
 		createHuffTree(huffCodeLiteral, huffTreeLiteral, symbolsLiteral, (hlit + 257));
 
-		//Distance
+		//------------------------------------------------------------------------------------------------------------------------------------ Distance ---------
+
 		int symbolsDistance[hdist + 1];
 		for(int i = 0; i < hdist + 1; i++)
 		{
 			symbolsDistance[i] = i;	//Cria o array de simbolos do alfabeto
 		}
 
-
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printArray(huffLiteral, (hlit + 257));	//Efeitos de teste
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		getOrderedSymbols(symbolsDistance, huffDistance, (hdist + 1));
+
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nSYMBOLS: \n");
 		//printArray(symbolsLiteral, (hlit + 257)); //Efeitos de teste
 		//printf("\nCODELEN: \n");
 		//printArray(huffLiteral, (hlit + 257));	//Efeitos de teste
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 
 		int bl_countDistance[hdist + 1];
 		for(int i = 0; i < hdist + 1; i++)
 		{
 			bl_countDistance[i] = 0;
 		}
-
+		
 		getBlCount(huffDistance, bl_countDistance, (hdist + 1));
+
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nBL_COUNT: \n");
 		//printArray(bl_countLiteral, (hlit + 257));	//Efeitos de teste
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 
 		int next_codeDistance[maxBitsDistance];
 		getNumericalValue(bl_countDistance, next_codeDistance, maxBitsDistance);	
+
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		//printf("\nNEXT_CODE: \n");	
 		//printArray(next_codeLiteral, (maxBitsLiteral + 1)); //maxBits + 1 para que o print possa imprimir até ao indice 5 	//Efeitos de teste
 		//printf("MAXBITSLITERAL: %d\n", maxBitsLiteral);
-		
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		struct tree* huffCodeDistance = (tree*) malloc((hdist + 1) * sizeof(tree));	
 		createHuffCode(huffCodeDistance, symbolsDistance, huffDistance, next_codeDistance, (hdist + 1));
 
-
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
 		/*for(int i = 0; i < SYMB; i++)	//Efeitos de teste
 		{
 			printf("[%d] - LEN: %d, CODE: %s\n", i, huffCodeLiteral[i].Len, huffCodeLiteral[i].Code);	
 		}*/
+		//------------------------------------------------------------------------------------------------------------------- Debugging -------
+
 		HuffmanTree* huffTreeDistance = createHFTree();
-
-		createHuffTree(huffCodeDistance, huffTreeDistance, symbolsDistance, (hdist + 1));
-
-
-		
+		createHuffTree(huffCodeDistance, huffTreeDistance, symbolsDistance, (hdist + 1));		
 		decodeDataBytes(huffTreeLiteral, huffTreeDistance, ficheiro, &frontFile, &rb, &availBits, gzFile);
 
-		
-
+		//Libertação dos ponteiros
 		free(huffCodeLiteral);
 		free(huffTreeLiteral);
 		free(huffCodeDistance);
 		free(huffTreeDistance);
-
-		printf("INT: %ld\n", sizeof(int));
-
-		printf("BLOCO: %d\n", numBlocks);
-		printf("BFINAL: %d\n", BFINAL);
-		//**************************************************
-        
-        																																										
+		//**************************************************																																			
 		//actualizar número de blocos analisados
 		numBlocks++;
 	}while(BFINAL == 0);
@@ -262,7 +307,7 @@ int main(int argc, char** argv)
 	//terminações			
 	fclose(gzFile);
 	fclose(fp);
-	printf("End: %d bloco(s) analisado(s).\n", numBlocks);	
+	printf("End: %d bloco(s) analisado(s).\n", numBlocks);
 
     /*//teste da função bits2String: RETIRAR antes de criar o executável final
 	char str[9];
@@ -655,7 +700,8 @@ char getLiteralLength(char hlit, unsigned int *rb, char *availBits, FILE *gzFile
 					if(index > maxBits)
 					{
 						maxBits = index;
-						printf("maxBits = %d\n", maxBits);
+						//------------------------------------------------------------------------------------------------------------------- Debugging -------
+						//printf("maxBits = %d\n", maxBits);
 					}
 				}
 				else if(index == 16)
@@ -830,13 +876,15 @@ void decodeDataBytes(HuffmanTree* huffTreeLiteral, HuffmanTree* huffTreeDistance
 
 			if((index >= 0) && (index <= 255))
 			{
+				//------------------------------------------------------------------------------------------------------------------- Debugging -------
 				//printf("INDEX: %d\n", index);
 				//printf("FRONTFILE: %d\n", *frontFile);
 				ficheiro[*frontFile] = index;
+				//------------------------------------------------------------------------------------------------------------------- Debugging -------
 				//printf("%d    ", *frontFile);
 				//printf("%c", ficheiro[*frontFile]);
 				(*frontFile)++;
-				
+				//------------------------------------------------------------------------------------------------------------------- Debugging -------				
 				//printf("ficheiro[0] = %c\n", ficheiro[0]);
 				//exit(0);
 			}
@@ -844,7 +892,8 @@ void decodeDataBytes(HuffmanTree* huffTreeLiteral, HuffmanTree* huffTreeDistance
 			{
 				if(index == 256)
 				{
-					printf("BREAK\n");
+					//------------------------------------------------------------------------------------------------------------------- Debugging -------
+					//printf("BREAK\n");
 					break;
 				}
 				else if(index >= 257 && index <= 285)
@@ -856,6 +905,7 @@ void decodeDataBytes(HuffmanTree* huffTreeLiteral, HuffmanTree* huffTreeDistance
 					for(int i = 0; i < copy; i++)
 					{
 						ficheiro[*frontFile] = ficheiro[recua + i];
+						//------------------------------------------------------------------------------------------------------------------- Debugging -------
 						//printf("%d   ", *frontFile);
 						//printf("%c", ficheiro[*frontFile]);
 						(*frontFile)++;
@@ -932,8 +982,9 @@ int decodeDist(HuffmanTree* huffTreeDistance, unsigned int *rb, char *availBits,
 			(*availBits) -= needBits;
 
 			recua = dist[index] + bits;
-			if(index >= 18)
-						printf("index: %d needBits: %d recua: %d\n", index, needBits, recua);
+			//------------------------------------------------------------------------------------------------------------------- Debugging -------
+			/*if(index >= 18)
+						printf("index: %d needBits: %d recua: %d\n", index, needBits, recua);*/
 		}
 	}
 	return recua;

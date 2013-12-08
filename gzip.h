@@ -30,6 +30,8 @@ long getOrigFileSize(FILE *gzFile);
 int getHeader(FILE *gzFile, gzipHeader *gzh);
 int isDynamicHuffman(unsigned char rb);
 void bits2String(char *strBits, int len, int byte);
+
+//------------------------------------------------------------------------------------------------------------------------------------------------- Funções criadas
 void getBlockFormat(unsigned int *rb, char *availBits, FILE *gzFile, char *hlit, char *hdist, char *hclen);
 int getCodeLength(unsigned int *rb, char *availBits, char hclen, int *codeLen, FILE *gzFile);
 void printArray(int *array, int arrayLen);
@@ -44,3 +46,4 @@ int getDistance(char hdist, unsigned int *rb, char *availBits, FILE *gzFile, Huf
 int decodeLen(int index, HuffmanTree* huffTreeLiteral, unsigned int *rb, char *availBits, FILE *gzFile);
 int decodeDist(HuffmanTree* huffTreeDistance, unsigned int *rb, char *availBits, FILE *gzFile);
 void decodeDataBytes(HuffmanTree* huffTreeLiteral, HuffmanTree* huffTreeDistance, char *ficheiro, int *frontFile, unsigned int *rb, char *availBits, FILE *gzFile);
+//------------------------------------------------------------------------------------------------------------------------------------------------- Funções criadas
